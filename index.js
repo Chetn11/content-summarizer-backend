@@ -1,11 +1,12 @@
 const express = require('express');
+const cors=require("cors")
 const bodyParser = require('body-parser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require("dotenv").config()
 
 const app = express();
 const port = 3000;
-
+app.use(cors())
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
