@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const JSON5=require("json5")
 const bodyParser = require("body-parser");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
@@ -29,11 +30,21 @@ app.post("/generate", async (req, res) => {
       `Summarize the following content and also give me sentiment analysis, topic identification, keyword extraction then convert into json format and give me just json file: ${prompt}`
     );
     var response = result.response.text();
-    let jsonResponse = response.replace(/```json\n|```/g, '');
-    // const text = response.text();
-    const jsonRes=JSON.parse(jsonResponse)
+    // let jsonResponse = response.replace(/```json\n|\n```/g, '').trim();
+    let jsonMatch = response.match(/```json\n([\s\S]*?)\n```/);
+    if (jsonMatch && jsonMatch[1]) {
+      let jsonResponse = jsonMatch[1].trim();
 
-    res.json(jsonRes);
+      // Log the cleaned string to ensure it is correct
+      console.log("Cleaned JSON String:\n" + jsonResponse);
+
+      // Parse the JSON string into an object
+      let jsonObject = JSON.parse(jsonResponse);
+      console.log("Parsed JSON Object:", jsonObject);
+      res.send(jsonObject)
+  } else {
+      throw new Error("No JSON content found in the response string.");
+  }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to generate content" });
@@ -44,21 +55,3 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
 
-// const {GoogleGenerativeAI}=require("@google/generative-ai");
-
-// // Access your API key as an environment variable.
-// const genAI = new GoogleGenerativeAI('AIzaSyB4An4lRY5NzrYTYaBsW_8qBmPiE4CnEmo');
-
-// async function run() {
-//   // Choose a model that's appropriate for your use case.
-//   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
-
-//   const prompt = "Write a story about a magic backpack."
-
-//   const result = await model.generateContent(prompt);
-//   const response = result.response;
-//   const text = response.text();
-//   console.log(text);
-// }
-
-// run();
