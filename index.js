@@ -26,12 +26,14 @@ app.post("/generate", async (req, res) => {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const result = await model.generateContent(
-      `Summarize the following content : ${prompt}`
+      `Summarize the following content and also give me sentiment analysis, topic identification, keyword extraction then convert into json format and give me just json file: ${prompt}`
     );
-    const response = result.response;
-    const text = response.text();
+    var response = result.response.text();
+    let jsonResponse = response.replace(/```json\n|```/g, '');
+    // const text = response.text();
+    const jsonRes=JSON.parse(jsonResponse)
 
-    res.json({ text });
+    res.json(jsonRes);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to generate content" });
